@@ -186,16 +186,16 @@ const elTablas = document.querySelector(".tablas");
 
 const main = async () => {
     console.log("1");
-    const tables = await generateBingoTables(3000);
+    const tables = await generateBingoTables(3);
     const uniqueArr = [...tables];
-    const aui = [...uniqueArr.map(u => u.map(a => a.values.map((b, i, a) => {
+   /*  const aui = [...uniqueArr.map(u => u.map(a => a.values.map((b, i, a) => {
         a[2] = '0';
         return a
     })))];
     const abi=[...aui.map(a => a.join())]
-    console.log(abi);
+    console.log(abi); */
     const auo = [...filterUniqueObjects(uniqueArr)]
-    console.table(abi.map(b=>b.split(",").reduce((a,b)=>a+b,'')).sort((a,b)=>a>b?1:-1));
+   // console.table(abi.map(b=>b.split(",").reduce((a,b)=>a+b,'')).sort((a,b)=>a>b?1:-1));
     const fragment = await generarTablasVisuales(auo);
     elTablas.appendChild(fragment);
     console.log("2");
