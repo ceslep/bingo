@@ -5,11 +5,11 @@ const random = (min, max) => {
 
 const key = (i) => {
     switch (i) {
-        case 0: return "B"; break;
-        case 1: return "I"; break;
-        case 2: return "N"; break;
-        case 3: return "G"; break;
-        case 4: return "O"; break;
+        case 0: return "B";
+        case 1: return "I";
+        case 2: return "N";
+        case 3: return "G";
+        case 4: return "O";
     }
 }
 
@@ -19,27 +19,27 @@ const generateUniqueRandomNumbers = (min, max) => {
 
         const generateNumber = () => {
             const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-            if (!numbers.includes(randomNumber)) {
+            if (!numbers.includes(randomNumber))
                 numbers.push(randomNumber);
-            }
 
-            if (numbers.length < 5) {
+
+            if (numbers.length < 5)
                 generateNumber();
-            } else {
+            else
                 resolve(numbers.sort((a, b) => a - b));
-            }
+
         };
 
-        if (max - min + 1 < 5) {
+        if (max - min + 1 < 5)
             reject(new Error('El rango especificado no es suficientemente grande para generar 5 números únicos.'));
-        } else {
+        else
             generateNumber();
-        }
+
     });
 }
 
 
-const generateBingoTable = async (codigo) => {
+const generateBingoTable = async (codigo, length) => {
     return new Promise(async (resolve, reject) => {
         const table = [];
         let k = 0;
@@ -50,9 +50,11 @@ const generateBingoTable = async (codigo) => {
             switch (i) {
                 case 0: numbers = await generateUniqueRandomNumbers(1, 15); break;
                 case 1: numbers = await generateUniqueRandomNumbers(16, 30); break;
-                case 2: {numbers = await generateUniqueRandomNumbers(31, 45); 
-                        numbers[2]="";
-                    break};
+                case 2: {
+                    numbers = await generateUniqueRandomNumbers(31, 45);
+                    numbers[2] = addLeadingZeros(codigo, length);
+                    break
+                };
                 case 3: numbers = await generateUniqueRandomNumbers(46, 60); break;
                 case 4: numbers = await generateUniqueRandomNumbers(61, 75); break;
             }
@@ -73,7 +75,7 @@ const generateBingoTables = async (numberOfTables) => {
         const tables = [];
         let k = 0;
         for (let i = 0; i < numberOfTables; i++) {
-            const table = await generateBingoTable(i + 1);
+            const table = await generateBingoTable(i + 1, numberOfTables);
             tables.push(table);
             k++;
         }
@@ -91,105 +93,112 @@ const generateBingoTables = async (numberOfTables) => {
 
 
 
-const addLeadingZeros=(number, max)=> {
+const addLeadingZeros = (number, max) => {
     const maxLength = String(max).length;
     const numberString = String(number);
     const zerosToAdd = maxLength - numberString.length;
-  
-    if (zerosToAdd <= 0) {
-      return numberString;
-    }
-  
+
+    if (zerosToAdd <= 0)
+        return numberString;
+
+
     const zeros = '0'.repeat(zerosToAdd);
     return zeros + numberString;
-  }
-  
-const elTablas = document.querySelector(".tablas");
+}
 
-const generarTablasVisuales =  (tablas) => {
-   
 
-    let k = 0;
-    tablas.forEach(tabla => {
+
+const generarTablasVisuales = (tablas) => {
+
+    return new Promise((resolve, reject) => {
+        let k = 0;
         const fragment = document.createDocumentFragment();
+        tablas.forEach(tabla => {
 
-        // Crear la tabla
-        const table = document.createElement('table');
-        const caption = document.createElement('caption');
-        caption.textContent=addLeadingZeros(tabla[0].codigo,tablas.length)
-        table.appendChild(caption)
-    
-        // Crear el thead
-        const thead = document.createElement('thead');
-        const trHead = document.createElement('tr');
-        for (let i = 1; i <= 5; i++) {
-            const th = document.createElement('th');
-            th.textContent = key(i - 1);
-            trHead.appendChild(th);
-        }
-        
-        table.appendChild(thead);
-        thead.appendChild(trHead);
-    
-        const tbody = document.createElement("tbody");
-        let tr;
-        let td;
-        for (let i = 0; i <= 4; i++) {
-            tr = document.createElement("tr");
+            const table = document.createElement('table');
+            table.classList.add("caption-top");
+            const caption = document.createElement('caption');
+            caption.classList.add("text-center");
+            caption.textContent = addLeadingZeros(tabla[0].codigo, tablas.length)
+            table.appendChild(caption)
 
-            for (let j = 0; j <= 4; j++) {
-                td = document.createElement("td");
-                //     console.log(tabla[j].values[i]);
-                td.textContent = tabla[j].values[i];
-                k++;
-                tr.appendChild(td);
+            const thead = document.createElement('thead');
+            const trHead = document.createElement('tr');
+            for (let i = 1; i <= 5; i++) {
+                const th = document.createElement('th');
+                th.textContent = key(i - 1);
+                trHead.appendChild(th);
             }
-            tbody.appendChild(tr);
-        }
-        table.appendChild(tbody);
-        fragment.appendChild(table);
-        elTablas.appendChild(fragment);
+
+            table.appendChild(thead);
+            thead.appendChild(trHead);
+
+            const tbody = document.createElement("tbody");
+            let tr;
+            let td;
+            for (let i = 0; i <= 4; i++) {
+                tr = document.createElement("tr");
+                for (let j = 0; j <= 4; j++) {
+                    td = document.createElement("td");
+                    td.textContent = tabla[j].values[i];
+                    if (i === j && j == 2) td.classList.add("fw-bold", "rotated-text");
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            fragment.appendChild(table);
+            k++;
+            if (k === tablas.length) resolve(fragment)
+
+        })
     })
-   
+
+
 
 }
 
 function filterUniqueObjects(array) {
     const checkUniqueArrays = (arr1, arr2) => {
-      if (arr1.length !== arr2.length) {
-        return false;
-      }
-  
-      for (let i = 0; i < arr1.length; i++) {
-        if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
-          if (!checkUniqueArrays(arr1[i], arr2[i])) {
+        if (arr1.length !== arr2.length) {
             return false;
-          }
-        } else if (arr1[i] !== arr2[i]) {
-          return false;
         }
-      }
-  
-      return true;
+
+        for (let i = 0; i < arr1.length; i++) {
+            if (Array.isArray(arr1[i]) && Array.isArray(arr2[i])) {
+                if (!checkUniqueArrays(arr1[i], arr2[i])) {
+                    return false;
+                }
+            } else if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+
+        return true;
     };
-  
+
     return array.filter((value, index) => {
-      return array.findIndex((obj, i) => i !== index && checkUniqueArrays(obj, value)) === -1;
+        return array.findIndex((obj, i) => i !== index && checkUniqueArrays(obj, value)) === -1;
     });
-  }
-  
+}
+
+const elTablas = document.querySelector(".tablas");
 
 const main = async () => {
     console.log("1");
-    const tables = await generateBingoTables(300);
+    const tables = await generateBingoTables(3000);
+    const uniqueArr = [...tables];
+    const aui = [...uniqueArr.map(u => u.map(a => a.values.map((b, i, a) => {
+        a[2] = '0';
+        return a
+    })))];
+    const abi=[...aui.map(a => a.join())]
+    console.log(abi);
+    const auo = [...filterUniqueObjects(uniqueArr)]
+    console.table(abi.map(b=>b.split(",").reduce((a,b)=>a+b,'')).sort((a,b)=>a>b?1:-1));
+    const fragment = await generarTablasVisuales(auo);
+    elTablas.appendChild(fragment);
     console.log("2");
-    //const uniqueArr = tables.filter(obj => tables.indexOf(obj) === tables.lastIndexOf(obj));
-    const uniqueArr=[...tables];
-    const json = JSON.stringify(uniqueArr, null, 4);
-    console.log(uniqueArr);
-    const auo=[...filterUniqueObjects(uniqueArr)]
-    console.log(auo);
-    generarTablasVisuales(auo)
 };
 
 main();
